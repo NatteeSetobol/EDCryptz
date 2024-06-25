@@ -85,7 +85,9 @@ void EncryptDirectory(char *basePath, uint8_t *key, bool encrypt,char* output)
                 }
             }
         }
+        closedir(dir);
     }
+
 }
 
 void Logo()
@@ -263,7 +265,6 @@ int main(int argc,char *args[] )
         {
             if (key)
             {
-
                 if (filename != NULL)
                 {
                     if (choice == DIRECTORY_TYPE )

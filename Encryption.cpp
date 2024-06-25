@@ -197,4 +197,10 @@ void DecryptFile(char *filename, uint8_t* key, char *output)
         output = filename;
     }  
     WriteToFile(output, encryptedData, header->size,"wb");
+
+    if (fileData)
+    {
+        free(fileData);
+        fileData=NULL;
+    }
 }
