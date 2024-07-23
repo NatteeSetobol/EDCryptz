@@ -40,7 +40,17 @@ void EncryptDirectory(char *basePath, uint8_t *key, bool encrypt,char* output)
 
                 if (S_ISDIR(info.st_mode))
                 {
-                    EncryptDirectory(path,key, encrypt, output);
+                    int folderPathLen = 0;
+                    char *folderPath = NULL;
+
+                    folderPathLen = strlen(path) + strlen(entry->d_name) + 10;
+                    folderPath = (char*) Alloc(folderPathLen);
+
+                    snprintf(folderPath,folderPathLen, "%s/%s", output, entry->d_name);
+                    printf("Created folder %s\n", folderPath);
+                    mkdir(folderPath,0755);
+
+                    EncryptDirectory(path,key, encrypt, folderPath);
                 } else {
                     int fullPathLength=0;
 
@@ -65,6 +75,8 @@ void EncryptDirectory(char *basePath, uint8_t *key, bool encrypt,char* output)
                         }
                         if (encrypt)
                         {
+                            printf("Full Path: %s\n", fullPath);
+                            printf("Output Path: %s\n", outputFile);
                             EncryptFile(fullPath, key,outputFile);
                         } else {
                             DecryptFile(fullPath, key, outputFile);
@@ -221,8 +233,13 @@ int main(int argc,char *args[] )
 
     if (gen==true)
     {
-        key = advandedRNG(id, len, time(NULL) ^ clock());
+        unsigned int rngTime = 0;
+
+        rngTime = time(NULL) ^ clock();
+        key = advandedRNG(id, len, 1721385828);
+        
         PrintHex(key, 16);
+        
     } else
     if (choice != NONE)
     {
