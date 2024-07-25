@@ -43,7 +43,7 @@ void EncryptDirectory(char *basePath, uint8_t *key, bool encrypt,char* output)
                     int folderPathLen = 0;
                     char *folderPath = NULL;
 
-                    folderPathLen = strlen(path) + strlen(entry->d_name) + 10;
+                    folderPathLen = strlen(output) + strlen(entry->d_name) + 10;
                     folderPath = (char*) Alloc(folderPathLen);
 
                     snprintf(folderPath,folderPathLen, "%s/%s", output, entry->d_name);
