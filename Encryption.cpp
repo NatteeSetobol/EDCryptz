@@ -13,8 +13,19 @@ uint8_t* ANSIX923Padding(uint8_t* data, size_t length,size_t *newLength)
 
     if (len == length)
     {
-        newData = (uint8_t*) Alloc(length*sizeof(uint8_t ));
-        memcpy(newData,data,length);
+        if (length < 16)
+        {
+           size_t newsize = 0;
+            newsize = length + (16-length); 
+            newData = (uint8_t*) Alloc(newsize*sizeof(uint8_t ));
+            memcpy(newData,data,length);
+
+            *newLength = newsize;
+          
+        } else {
+            newData = (uint8_t*) Alloc(length*sizeof(uint8_t ));
+            memcpy(newData,data,length);
+        }
         //newData = data;
     } else {
         size_t newsize = 0;
