@@ -3,6 +3,7 @@
 
 #include <time.h>
 #include <stdint.h>
+#include "ErrorHandle.h"
 #include "aes.h"
 #include "cutil.h"
 
@@ -11,7 +12,7 @@ const char SIGN[] = "EX";
 struct en_header
 {
     short signature;
-    int size;
+    int size; //encyption size of the file
     int padding;
 };
 

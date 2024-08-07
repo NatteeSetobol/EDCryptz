@@ -3,7 +3,7 @@
 MAIN_FILE="../main.cpp"
 COMPILER="g++"
 MACRO="-DDEBUG"
-CPP="../cutil.cpp ../Encryption.cpp ../aes.c"
+CPP="../cutil.cpp ../Encryption.cpp ../aes.c ../ErrorHandle.cpp"
 FLAGS="-w -g -fsanitize=address"
 OUTPUT="edcryptz"
 
