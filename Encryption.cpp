@@ -123,6 +123,7 @@ struct en_header CreateHeader(int fileLength, int padding)
     header.signature = 0xEB;
     header.size = fileLength;
     header.padding = padding;
+    header.version = 1.0;
 
     return header;
 }
@@ -214,4 +215,59 @@ void DecryptFile(char *filename, uint8_t* key, char *output)
         free(fileData);
         fileData=NULL;
     }
+}
+
+uint8_t *EncryptString(char* filename, uint8_t *key)
+{
+    uint8_t *fileWithPadding= NULL; 
+    uint8_t *fileData = NULL; 
+    size_t fileLen = 0;
+    size_t newLength = 0;
+    AES_ctx ctx;
+    size_t blocks = 0;
+    struct en_header header={};
+    char *id = NULL;
+
+    AES_init_ctx(&ctx,key);
+
+    fileLen = strlen(filename);
+
+    fileWithPadding =  ANSIX923Padding((uint8_t*)filename, fileLen, &newLength);
+
+    blocks = newLength / BLOCK_SIZE;
+
+    for (size_t i=0; i< blocks; i++)
+    {
+        AES_ECB_encrypt(&ctx,fileWithPadding + (i * BLOCK_SIZE));
+    }
+
+    return fileWithPadding;
+}
+
+uint8_t *DecryptString(uint8_t* filename, uint8_t *key)
+{
+    size_t num_blocks=0;
+    uint8_t *fileData = NULL; 
+    size_t fileLen=0;
+    struct en_header *header=NULL;
+    uint8_t* encryptedData = NULL; 
+    size_t encryptedDataLen = 0;
+    
+    AES_ctx ctx;
+    AES_init_ctx(&ctx,key);
+
+    encryptedDataLen = strlen((char*) filename);
+
+    encryptedData = (uint8_t*) Alloc(encryptedDataLen+10);
+
+    memcpy(encryptedData,filename,encryptedDataLen);
+
+    num_blocks = encryptedDataLen / BLOCK_SIZE;
+
+    for (size_t i = 0; i < num_blocks; i++)
+    {
+        AES_ECB_decrypt(&ctx,encryptedData + (i * BLOCK_SIZE));
+    }
+
+    return encryptedData;
 }

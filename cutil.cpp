@@ -230,3 +230,116 @@ bool StrCmp(char* source, char* compareString)
 	return results;
 }
 
+uint8_t* ToHexStr(const uint8_t* str, uint8_t len)
+{
+  uint8_t *encryptedString = (uint8_t*) Alloc(len*2);
+  int pos=0;
+
+  for (uint8_t i = 0; i < len; i++) {
+    char temp[25] = {};
+    int tempLen = 0;
+
+
+    sprintf(temp, "%.2x", str[i]);
+    tempLen = strlen(temp);
+
+    memcpy(encryptedString+pos,temp,tempLen);
+    pos +=  tempLen;
+  }
+  printf("\n");
+ 
+  return encryptedString;
+}
+uint8_t *ToStrHex(uint8_t* str)
+{
+  uint8_t *hexData = NULL;
+  int  strLen = 0;
+  int pos = 0;
+  
+  strLen = strlen((char*) str);
+
+  hexData = (uint8_t*) Alloc(strLen);
+
+  for (int i=0; i < strLen;i+=2)
+  {
+      uint8_t hexLeft = 0;
+      uint8_t hexRight= 0;
+      uint8_t combined[1] = {};
+
+      hexLeft = chartohex(str[i]);
+      hexRight= chartohex(str[i+1]);
+
+      combined[0] |= hexLeft;
+      combined[0] = combined[0] <<  4 ;
+      combined[0] |=hexRight;
+
+      memcpy(hexData+pos,combined,sizeof(uint8_t));
+
+      pos++;
+  }
+
+  printf("\n");
+
+  return hexData;
+}
+
+uint8_t *GetFilenameFromPath(char* filename)
+{
+    uint8_t *newStringName = NULL;
+    uint8_t *decryptedDir = NULL;
+    int slashPos=0;
+    int filenameLen = 0;
+    int findSlashLen = 0;
+    int newFilenameLen = 0;
+
+    filenameLen = strlen(filename);
+
+    findSlashLen = filenameLen;
+
+    if (filename[filenameLen] == '/')
+    {
+        findSlashLen--;
+    }
+
+    for (int i=findSlashLen;i > -1;i--)
+    {
+        if (filename[i] == '/')
+        {
+            slashPos = i;
+            break;
+        }
+    }
+
+    newStringName = (uint8_t*) Alloc(filenameLen);
+    newFilenameLen = findSlashLen - slashPos;
+
+    /*
+        /home/myhomedir/code/123421/test 
+        size = 32
+        slash_pos = 28
+        32-28 = 4
+    */
+    if (findSlashLen > 0)
+    {
+        memcpy(newStringName,filename+slashPos+1, newFilenameLen);
+    }
+
+    return newStringName;
+}
+
+bool FindChar(char* haystack, char needle)
+{
+  int haystackLen = 0;
+
+  haystackLen = strlen(haystack);
+
+  for (int i=0;i<haystackLen;i++)
+  {
+    if (haystack[i] == needle)
+    {
+        return true;
+    }
+  }
+
+  return false;
+}

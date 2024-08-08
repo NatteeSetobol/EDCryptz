@@ -2,9 +2,13 @@
 #define __CUTIL_H__
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <string.h>
+#include <stdint.h>
 
+bool FindChar(char* haystack, char needle);
+uint8_t *GetFilenameFromPath(char* filename);
+uint8_t *ToStrHex(uint8_t* str);
+uint8_t* ToHexStr(const uint8_t* str, uint8_t len);
 uint8_t ConvertToHex(char* hexChar);
 bool WriteToFile(const char* filename, uint8_t *data, size_t length, char *mode);
 uint8_t *ReadFromFile(const char* filename, size_t* length);

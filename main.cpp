@@ -5,6 +5,13 @@
 #include "ErrorHandle.h"
 #include "Encryption.h"
 
+/*
+    TO DO():
+        * Add a version to the Encryption header
+        * If not output is specified then the output should be tagged the original name + _e or _d
+        * Encrypt and store filenames and directory in the header
+*/
+
 enum typeChoice {
     NONE,
     FILE_TYPE,
@@ -157,13 +164,24 @@ int main(int argc,char *args[] )
             {
                 if (choice == DIRECTORY_TYPE )
                 {
-                    if (outputFile)
+                    /*
+                        NOTE(): If there is no out put indicated then we shall create a new directory with the same
+                        name except tag _e at the end.
+                    */
+ 
+                    if (outputFile == NULL)
                     {
-                        mkdir(outputFile, 0755);
-                        printf("[+] Encrypting Directory: %s to %s \n", filename,outputFile);
-                    } else {
-                        printf("[+] Encrypting Directory: %s \n", filename);
+                        int newOutputLen = 0;
+
+                        newOutputLen = strlen(filename)+10;
+                        outputFile = (char*) Alloc(newOutputLen);
+
+                        snprintf(outputFile,newOutputLen+5,"%s_e", filename);
                     }
+
+                    mkdir(outputFile, 0755);
+                    printf("[+] Encrypting Directory: %s to %s \n", filename,outputFile);
+
                     EncryptDirectory(filename,key, true, outputFile);
                     printf("[+] Encrypted Directory.");
                 } else {
@@ -188,13 +206,17 @@ int main(int argc,char *args[] )
                 {
                     if (choice == DIRECTORY_TYPE )
                     {
-                        if (outputFile)
+                        if (outputFile == NULL)
                         {
-                            mkdir(outputFile, 0755);
-                            printf("[+] Decrypting Directory: %s to %s\n", filename,outputFile);
-                        } else {
-                            printf("[+] Decrypting Directory: %s\n", filename);
+                            int newOutputLen = 0;
+
+                            newOutputLen = strlen(filename)+10;
+                            outputFile = (char*) Alloc(newOutputLen);
+
+                            snprintf(outputFile,newOutputLen+5,"%s_d", filename);
                         }
+                        mkdir(outputFile, 0755);
+                        printf("[+] Decrypting Directory: %s to %s\n", filename,outputFile);
 
                         if (EncryptDirectory(filename,key, false,outputFile))
                         {
@@ -265,7 +287,7 @@ bool EncryptDirectory(char *basePath, uint8_t *key, bool encrypt,char* output)
                     if (S_ISDIR(info.st_mode))
                     {
                         char *folderPath = NULL;
-                        //FIX(): If output is null then this crashes
+
                         if (output)
                         {
                             folderPath = CreatePath(output,entry->d_name);

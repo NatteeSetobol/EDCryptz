@@ -14,8 +14,13 @@ struct en_header
     short signature;
     int size; //encyption size of the file
     int padding;
+    float version;
+    int filenameLen;
 };
 
+
+uint8_t *DecryptString(uint8_t* filename, uint8_t *key);
+uint8_t *EncryptString(char* filename, uint8_t *key);
 void EncryptFile(char *filename, uint8_t *key, char* output=NULL);
 void DecryptFile(char *filename, uint8_t* key, char* output=NULL);
 uint8_t* ANSIX923Padding(uint8_t* data, size_t length,size_t *newLength);
