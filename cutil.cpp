@@ -246,7 +246,6 @@ uint8_t* ToHexStr(const uint8_t* str, uint8_t len)
     memcpy(encryptedString+pos,temp,tempLen);
     pos +=  tempLen;
   }
-  printf("\n");
  
   return encryptedString;
 }
@@ -278,7 +277,6 @@ uint8_t *ToStrHex(uint8_t* str)
       pos++;
   }
 
-  printf("\n");
 
   return hexData;
 }

@@ -96,7 +96,8 @@ int main(int argc,char *args[] )
 
             if (StrCmp(option, "-o"))
             {
-                outputFile = optionVal;
+
+                //outputFile = optionVal;
             }
             if (StrCmp(option, "-k"))
             {
@@ -168,7 +169,7 @@ int main(int argc,char *args[] )
                         NOTE(): If there is no out put indicated then we shall create a new directory with the same
                         name except tag _e at the end.
                     */
- 
+                    /*
                     if (outputFile == NULL)
                     {
                         int newOutputLen = 0;
@@ -177,7 +178,12 @@ int main(int argc,char *args[] )
                         outputFile = (char*) Alloc(newOutputLen);
 
                         snprintf(outputFile,newOutputLen+5,"%s_e", filename);
-                    }
+                    }*/
+                    uint8_t *encryptionBytes = NULL;
+                    size_t encryptionSize = 0;
+
+                    encryptionBytes = EncryptString(filename, key, &encryptionSize);
+                    outputFile = (char*) ToHexStr(encryptionBytes, encryptionSize);
 
                     mkdir(outputFile, 0755);
                     printf("[+] Encrypting Directory: %s to %s \n", filename,outputFile);
@@ -206,6 +212,8 @@ int main(int argc,char *args[] )
                 {
                     if (choice == DIRECTORY_TYPE )
                     {
+                        /*
+                        
                         if (outputFile == NULL)
                         {
                             int newOutputLen = 0;
@@ -215,6 +223,12 @@ int main(int argc,char *args[] )
 
                             snprintf(outputFile,newOutputLen+5,"%s_d", filename);
                         }
+                        */
+                        uint8_t *decryptBytes = NULL;
+
+                        decryptBytes = ToStrHex((uint8_t*) filename);
+                        outputFile = (char*)DecryptString(decryptBytes, key);
+
                         mkdir(outputFile, 0755);
                         printf("[+] Decrypting Directory: %s to %s\n", filename,outputFile);
 
@@ -287,12 +301,36 @@ bool EncryptDirectory(char *basePath, uint8_t *key, bool encrypt,char* output)
                     if (S_ISDIR(info.st_mode))
                     {
                         char *folderPath = NULL;
-
+                        /*
                         if (output)
                         {
                             folderPath = CreatePath(output,entry->d_name);
 
                             printf("Created folder %s\n", folderPath);
+
+                            mkdir(folderPath,0755);
+                        }
+                        */
+                        if (encrypt)
+                        {
+                            uint8_t *encryptionBytes = NULL;
+                            uint8_t *encryptionString= NULL;
+                            size_t encryptionSize = 0;
+
+                            encryptionBytes = EncryptString(entry->d_name, key, &encryptionSize);
+                            encryptionString= ToHexStr(encryptionBytes, encryptionSize);
+
+                            folderPath = CreatePath(output,(char*)encryptionString);
+
+                            mkdir(folderPath,0755);
+                        } else {
+                            uint8_t *decryptBytes = NULL;
+                            char *decryptString = NULL;
+
+                            decryptBytes = ToStrHex((uint8_t*)  entry->d_name);
+                            decryptString = (char*)DecryptString(decryptBytes, key);
+
+                            folderPath = CreatePath(output,decryptString);
 
                             mkdir(folderPath,0755);
                         }
@@ -310,16 +348,31 @@ bool EncryptDirectory(char *basePath, uint8_t *key, bool encrypt,char* output)
 
                             fullPath = CreatePath(basePath,entry->d_name);
 
-                            if (output)
-                            {
-                                outputFile = CreatePath(output,entry->d_name);
-                            }
+                            
                             if (encrypt)
                             {
+                                uint8_t *encryptionBytes = NULL;
+                                uint8_t *encryptionString = NULL;
+                                size_t encryptionSize = 0;
+
+                                encryptionBytes = EncryptString(entry->d_name, key, &encryptionSize);
+                                encryptionString = ToHexStr(encryptionBytes, encryptionSize);
+
+                                outputFile = CreatePath(output,(char*)encryptionString);
+
                                 printf("Full Path: %s\n", fullPath);
                                 printf("Output Path: %s\n", outputFile);
                                 EncryptFile(fullPath, key,outputFile);
                             } else {
+
+                                uint8_t *decryptBytes = NULL;
+                                uint8_t *decryptString = NULL;
+
+                                decryptBytes = ToStrHex((uint8_t*) entry->d_name );
+                                decryptString = DecryptString(decryptBytes, key);
+
+                                outputFile = CreatePath(output,(char*)decryptString);
+
                                 DecryptFile(fullPath, key, outputFile);
                             }
 

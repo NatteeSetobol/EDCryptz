@@ -217,7 +217,7 @@ void DecryptFile(char *filename, uint8_t* key, char *output)
     }
 }
 
-uint8_t *EncryptString(char* filename, uint8_t *key)
+uint8_t *EncryptString(char* filename, uint8_t *key, size_t *encryptionSize)
 {
     uint8_t *fileWithPadding= NULL; 
     uint8_t *fileData = NULL; 
@@ -233,6 +233,8 @@ uint8_t *EncryptString(char* filename, uint8_t *key)
     fileLen = strlen(filename);
 
     fileWithPadding =  ANSIX923Padding((uint8_t*)filename, fileLen, &newLength);
+
+    *encryptionSize = newLength;
 
     blocks = newLength / BLOCK_SIZE;
 

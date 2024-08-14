@@ -20,7 +20,7 @@ struct en_header
 
 
 uint8_t *DecryptString(uint8_t* filename, uint8_t *key);
-uint8_t *EncryptString(char* filename, uint8_t *key);
+uint8_t *EncryptString(char* filename, uint8_t *key, size_t *encryptionSize);
 void EncryptFile(char *filename, uint8_t *key, char* output=NULL);
 void DecryptFile(char *filename, uint8_t* key, char* output=NULL);
 uint8_t* ANSIX923Padding(uint8_t* data, size_t length,size_t *newLength);
