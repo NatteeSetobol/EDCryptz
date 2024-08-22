@@ -96,7 +96,6 @@ int main(int argc,char *args[] )
 
             if (StrCmp(option, "-o"))
             {
-
                 //outputFile = optionVal;
             }
             if (StrCmp(option, "-k"))
@@ -169,16 +168,7 @@ int main(int argc,char *args[] )
                         NOTE(): If there is no out put indicated then we shall create a new directory with the same
                         name except tag _e at the end.
                     */
-                    /*
-                    if (outputFile == NULL)
-                    {
-                        int newOutputLen = 0;
 
-                        newOutputLen = strlen(filename)+10;
-                        outputFile = (char*) Alloc(newOutputLen);
-
-                        snprintf(outputFile,newOutputLen+5,"%s_e", filename);
-                    }*/
                     uint8_t *encryptionBytes = NULL;
                     size_t encryptionSize = 0;
 
@@ -212,18 +202,6 @@ int main(int argc,char *args[] )
                 {
                     if (choice == DIRECTORY_TYPE )
                     {
-                        /*
-                        
-                        if (outputFile == NULL)
-                        {
-                            int newOutputLen = 0;
-
-                            newOutputLen = strlen(filename)+10;
-                            outputFile = (char*) Alloc(newOutputLen);
-
-                            snprintf(outputFile,newOutputLen+5,"%s_d", filename);
-                        }
-                        */
                         uint8_t *decryptBytes = NULL;
 
                         decryptBytes = ToStrHex((uint8_t*) filename);
@@ -241,8 +219,6 @@ int main(int argc,char *args[] )
                         DecryptFile(filename, key, outputFile);
                         printf("[+] Decrypted files\n");
                     }
-                    //printf("\nYour key is: \n");
-                   // PrintHex(key, 16);
                 } else {
                     ShowOptions();
                     WriteError("[-] File is required\n");
@@ -301,16 +277,7 @@ bool EncryptDirectory(char *basePath, uint8_t *key, bool encrypt,char* output)
                     if (S_ISDIR(info.st_mode))
                     {
                         char *folderPath = NULL;
-                        /*
-                        if (output)
-                        {
-                            folderPath = CreatePath(output,entry->d_name);
-
-                            printf("Created folder %s\n", folderPath);
-
-                            mkdir(folderPath,0755);
-                        }
-                        */
+                        
                         if (encrypt)
                         {
                             uint8_t *encryptionBytes = NULL;
@@ -332,10 +299,12 @@ bool EncryptDirectory(char *basePath, uint8_t *key, bool encrypt,char* output)
 
                             folderPath = CreatePath(output,decryptString);
 
+                            printf("Created Folder: %s\n",folderPath );
                             mkdir(folderPath,0755);
                         }
 
                         success = EncryptDirectory(path,key, encrypt, folderPath);
+                        
                     } else {
                         int fullPathLength=0;
 
@@ -348,7 +317,6 @@ bool EncryptDirectory(char *basePath, uint8_t *key, bool encrypt,char* output)
 
                             fullPath = CreatePath(basePath,entry->d_name);
 
-                            
                             if (encrypt)
                             {
                                 uint8_t *encryptionBytes = NULL;
@@ -375,7 +343,7 @@ bool EncryptDirectory(char *basePath, uint8_t *key, bool encrypt,char* output)
 
                                 DecryptFile(fullPath, key, outputFile);
                             }
-
+                            
                             if (outputFile)
                             {
                                 free(outputFile);
@@ -387,6 +355,7 @@ bool EncryptDirectory(char *basePath, uint8_t *key, bool encrypt,char* output)
                                 free(fullPath);
                                 fullPath=NULL;
                             }
+                            
                         }
                     }
                 }

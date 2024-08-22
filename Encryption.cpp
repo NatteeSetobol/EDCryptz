@@ -8,6 +8,7 @@ uint8_t* ANSIX923Padding(uint8_t* data, size_t length,size_t *newLength)
 {
     uint8_t len = 0;
     uint8_t *newData = NULL;
+    size_t newsize = 0;
 
     len = AES_BLOCKLEN - length % AES_BLOCKLEN;
 
@@ -15,36 +16,26 @@ uint8_t* ANSIX923Padding(uint8_t* data, size_t length,size_t *newLength)
     {
         if (length < 16)
         {
-           size_t newsize = 0;
             newsize = length + (16-length); 
             newData = (uint8_t*) Alloc(newsize*sizeof(uint8_t ));
             memcpy(newData,data,length);
 
-            *newLength = newsize;
           
         } else {
             newData = (uint8_t*) Alloc(length*sizeof(uint8_t ));
             memcpy(newData,data,length);
         }
-        //newData = data;
     } else {
-        size_t newsize = 0;
         newsize = length + len; 
         if (newsize >= 16)
         {
             newData = (uint8_t*) Alloc(newsize*sizeof(uint8_t ));
             memcpy(newData,data,length);
-
-            *newLength = newsize;
-
- //           if (data)
-  //          {
-   //             free(data);
-    //            data = NULL;
-     //       }
         
         }
     }
+
+    *newLength = newsize;
 
     return newData;
 }

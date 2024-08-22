@@ -232,7 +232,7 @@ bool StrCmp(char* source, char* compareString)
 
 uint8_t* ToHexStr(const uint8_t* str, uint8_t len)
 {
-  uint8_t *encryptedString = (uint8_t*) Alloc(len*2);
+  uint8_t *encryptedString = (uint8_t*) Alloc( (len*2) + 1);
   int pos=0;
 
   for (uint8_t i = 0; i < len; i++) {
