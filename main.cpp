@@ -205,7 +205,7 @@ int main(int argc,char *args[] )
                         uint8_t *decryptBytes = NULL;
 
                         decryptBytes = ToStrHex((uint8_t*) filename);
-                        outputFile = (char*)DecryptString(decryptBytes, key);
+                        outputFile = (char*)DecryptString(decryptBytes, key, strlen(filename) / 2 );
 
                         mkdir(outputFile, 0755);
                         printf("[+] Decrypting Directory: %s to %s\n", filename,outputFile);
@@ -295,7 +295,7 @@ bool EncryptDirectory(char *basePath, uint8_t *key, bool encrypt,char* output)
                             char *decryptString = NULL;
 
                             decryptBytes = ToStrHex((uint8_t*)  entry->d_name);
-                            decryptString = (char*)DecryptString(decryptBytes, key);
+                            decryptString = (char*)DecryptString(decryptBytes, key, strlen(entry->d_name)/2);
 
                             folderPath = CreatePath(output,decryptString);
 
@@ -337,7 +337,7 @@ bool EncryptDirectory(char *basePath, uint8_t *key, bool encrypt,char* output)
                                 uint8_t *decryptString = NULL;
 
                                 decryptBytes = ToStrHex((uint8_t*) entry->d_name );
-                                decryptString = DecryptString(decryptBytes, key);
+                                decryptString = DecryptString(decryptBytes, key, strlen(entry->d_name)/2);
 
                                 outputFile = CreatePath(output,(char*)decryptString);
 

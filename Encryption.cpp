@@ -237,11 +237,10 @@ uint8_t *EncryptString(char* filename, uint8_t *key, size_t *encryptionSize)
     return fileWithPadding;
 }
 
-uint8_t *DecryptString(uint8_t* filename, uint8_t *key)
+uint8_t *DecryptString(uint8_t* filename, uint8_t *key, size_t fileLen)
 {
     size_t num_blocks=0;
     uint8_t *fileData = NULL; 
-    size_t fileLen=0;
     struct en_header *header=NULL;
     uint8_t* encryptedData = NULL; 
     size_t encryptedDataLen = 0;
@@ -249,7 +248,7 @@ uint8_t *DecryptString(uint8_t* filename, uint8_t *key)
     AES_ctx ctx;
     AES_init_ctx(&ctx,key);
 
-    encryptedDataLen = sizeof(filename);
+    encryptedDataLen = fileLen;
 
     encryptedData = (uint8_t*) Alloc(encryptedDataLen+10);
 
