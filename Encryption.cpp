@@ -249,7 +249,7 @@ uint8_t *DecryptString(uint8_t* filename, uint8_t *key)
     AES_ctx ctx;
     AES_init_ctx(&ctx,key);
 
-    encryptedDataLen = strlen((char*) filename);
+    encryptedDataLen = sizeof(filename);
 
     encryptedData = (uint8_t*) Alloc(encryptedDataLen+10);
 
