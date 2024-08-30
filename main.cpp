@@ -171,8 +171,11 @@ int main(int argc,char *args[] )
 
                     uint8_t *encryptionBytes = NULL;
                     size_t encryptionSize = 0;
+                    uint8_t *unEncryptedFilename = NULL;
 
-                    encryptionBytes = EncryptString(filename, key, &encryptionSize);
+                    unEncryptedFilename = GetFilenameFromPath(filename);
+
+                    encryptionBytes = EncryptString((char*)unEncryptedFilename, key, &encryptionSize);
                     outputFile = (char*) ToHexStr(encryptionBytes, encryptionSize);
 
                     mkdir(outputFile, 0755);
@@ -203,8 +206,11 @@ int main(int argc,char *args[] )
                     if (choice == DIRECTORY_TYPE )
                     {
                         uint8_t *decryptBytes = NULL;
+                        uint8_t *encyptedFilename = NULL;
 
-                        decryptBytes = ToStrHex((uint8_t*) filename);
+                        encyptedFilename= GetFilenameFromPath(filename);
+
+                        decryptBytes = ToStrHex(encyptedFilename);
                         outputFile = (char*)DecryptString(decryptBytes, key, strlen(filename) / 2 );
 
                         mkdir(outputFile, 0755);
