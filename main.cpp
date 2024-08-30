@@ -211,7 +211,7 @@ int main(int argc,char *args[] )
                         encyptedFilename= GetFilenameFromPath(filename);
 
                         decryptBytes = ToStrHex(encyptedFilename);
-                        outputFile = (char*)DecryptString(decryptBytes, key, strlen(filename) / 2 );
+                        outputFile = (char*)DecryptString(decryptBytes, key, strlen(encyptedFilename) / 2 );
 
                         mkdir(outputFile, 0755);
                         printf("[+] Decrypting Directory: %s to %s\n", filename,outputFile);
