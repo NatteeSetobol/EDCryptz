@@ -179,7 +179,7 @@ int main(int argc,char *args[] )
                     outputFile = (char*) ToHexStr(encryptionBytes, encryptionSize);
 
                     mkdir(outputFile, 0755);
-                    printf("[+] Encrypting Directory: %s to %s \n", filename,outputFile);
+                    printf("[+] Encrypting Directory: %s to %s \n",unEncryptedFilename ,outputFile);
 
                     EncryptDirectory(filename,key, true, outputFile);
                     printf("[+] Encrypted Directory.");
@@ -214,7 +214,7 @@ int main(int argc,char *args[] )
                         outputFile = (char*)DecryptString(decryptBytes, key, strlen((char*)encyptedFilename) / 2 );
 
                         mkdir(outputFile, 0755);
-                        printf("[+] Decrypting Directory: %s to %s\n", filename,outputFile);
+                        printf("[+] Decrypting Directory: %s to %s\n",encyptedFilename ,outputFile);
 
                         if (EncryptDirectory(filename,key, false,outputFile))
                         {
