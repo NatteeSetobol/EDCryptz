@@ -294,9 +294,9 @@ uint8_t *GetFilenameFromPath(char* filename)
 
     findSlashLen = filenameLen;
 
-    if (filename[filenameLen] == '/')
+    if (filename[filenameLen-1] == '/')
     {
-        findSlashLen--;
+        findSlashLen-=2;
     }
 
     for (int i=findSlashLen;i > -1;i--)

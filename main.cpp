@@ -52,6 +52,7 @@ int main(int argc,char *args[] )
 
     Logo();
 
+
     for (int i=1; i < argc;i++)
     {
         char *option = NULL;
