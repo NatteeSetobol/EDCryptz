@@ -285,7 +285,7 @@ uint8_t *GetFilenameFromPath(char* filename)
 {
     uint8_t *newStringName = NULL;
     uint8_t *decryptedDir = NULL;
-    int slashPos=0;
+    int slashPos=-1;
     int filenameLen = 0;
     int findSlashLen = 0;
     int newFilenameLen = 0;
@@ -307,21 +307,25 @@ uint8_t *GetFilenameFromPath(char* filename)
             break;
         }
     }
-
-    newStringName = (uint8_t*) Alloc(filenameLen);
-    newFilenameLen = findSlashLen - slashPos;
-
-    /*
-        /home/myhomedir/code/123421/test 
-        size = 32
-        slash_pos = 28
-        32-28 = 4
-    */
-    if (findSlashLen > 0)
+    if (slashPos != -1)
     {
-        memcpy(newStringName,filename+slashPos+1, newFilenameLen);
-    }
+      newStringName = (uint8_t*) Alloc(filenameLen);
+      newFilenameLen = findSlashLen - slashPos;
 
+      /*
+          /home/myhomedir/code/123421/test 
+          size = 32
+          slash_pos = 28
+          32-28 = 4
+      */
+      if (findSlashLen > 0)
+      {
+          memcpy(newStringName,filename+slashPos+1, newFilenameLen);
+      }
+    } else {
+      newStringName = (uint8_t*) Alloc(filenameLen);
+      memcpy(newStringName,filename,filenameLen);
+    }
     return newStringName;
 }
 
