@@ -204,7 +204,7 @@ uint8_t chartohex(char c) {
     res = c - '0';
   else if (c >= 'a' && c <= 'f')
     res = c - 'a' + 10;
-  else //if (c >= 'A' && c <= 'F')
+  else if (c >= 'A' && c <= 'F')
     res = c - 'A' + 10;
   return res;
 }

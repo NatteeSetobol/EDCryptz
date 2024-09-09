@@ -18,7 +18,6 @@ enum typeChoice {
     DIRECTORY_TYPE
 };
 
-
 bool EncryptDirectory(char *basePath, uint8_t *key, bool encrypt,char* output);
 void ShowOptions();
 void Logo();
@@ -34,7 +33,9 @@ int main(int argc,char *args[] )
     bool encryptFile= false;
     bool choosenKey = false;
     enum typeChoice choice = NONE; 
-    char *outputFile = NULL;   
+    char *outputFile = NULL;
+    bool edstring = false;
+    char *edstringStr = NULL;
 
     /*j
     Get Options
@@ -94,9 +95,13 @@ int main(int argc,char *args[] )
                 }
             }
 
-            if (StrCmp(option, "-o"))
+            if (StrCmp(option, "-s"))
             {
-                //outputFile = optionVal;
+                if (i+1 < argc)
+                {
+                    edstringStr = args[i+1];
+                    edstring = true;
+                }
             }
             if (StrCmp(option, "-k"))
             {
@@ -141,6 +146,47 @@ int main(int argc,char *args[] )
         } 
     }
 
+    if (edstring == true)
+    {
+
+        uint8_t *encryptionBytes = NULL;
+
+        if (encryptFile )
+        {
+            char *outputString=NULL;
+            size_t encryptionSize = 0;
+
+            if (choosenKey == false)
+            {
+                unsigned int rngTime = 0;
+
+                rngTime = time(NULL) ^ clock();
+                key = advandedRNG(id, len, rngTime);
+            } 
+            
+            encryptionBytes = EncryptString((char*)edstringStr, key, &encryptionSize);
+            outputString = (char*) ToHexStr(encryptionBytes, encryptionSize);
+
+            printf("%s\n", outputString);
+
+            PrintHex(key, 16);
+        } else {
+            if (choosenKey)
+            {
+                uint8_t *decryptBytes = NULL;
+                uint8_t *decryptString = NULL;
+
+                decryptBytes = ToStrHex((uint8_t*) edstringStr );
+                decryptString = DecryptString(decryptBytes, key, strlen(edstringStr)/2);
+
+                printf("%s\n",decryptString );
+            } else 
+            {
+                WriteError("[-] Key should be exactly 32 in length.\n");
+            }
+        }
+
+    } else
     if (gen==true)
     {
         unsigned int rngTime = 0;
