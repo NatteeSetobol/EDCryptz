@@ -18,6 +18,7 @@ enum typeChoice {
     DIRECTORY_TYPE
 };
 
+bool IsOnSkipList(char* filename);
 bool EncryptDirectory(char *basePath, uint8_t *key, bool encrypt,char* output);
 void ShowOptions();
 void Logo();
@@ -328,35 +329,40 @@ bool EncryptDirectory(char *basePath, uint8_t *key, bool encrypt,char* output)
                 } else {
                     if (S_ISDIR(info.st_mode))
                     {
+
                         char *folderPath = NULL;
                         
-                        if (encrypt)
+                        if (IsOnSkipList(entry->d_name))
                         {
-                            uint8_t *encryptionBytes = NULL;
-                            uint8_t *encryptionString= NULL;
-                            size_t encryptionSize = 0;
-
-                            encryptionBytes = EncryptString(entry->d_name, key, &encryptionSize);
-                            encryptionString= ToHexStr(encryptionBytes, encryptionSize);
-
-                            folderPath = CreatePath(output,(char*)encryptionString);
-
-                            mkdir(folderPath,0755);
+                            printf("[!] Skipping %s\n", entry->d_name);
                         } else {
-                            uint8_t *decryptBytes = NULL;
-                            char *decryptString = NULL;
+                            if (encrypt)
+                            {
+                                uint8_t *encryptionBytes = NULL;
+                                uint8_t *encryptionString= NULL;
+                                size_t encryptionSize = 0;
 
-                            decryptBytes = ToStrHex((uint8_t*)  entry->d_name);
-                            decryptString = (char*)DecryptString(decryptBytes, key, strlen(entry->d_name)/2);
+                                encryptionBytes = EncryptString(entry->d_name, key, &encryptionSize);
+                                encryptionString= ToHexStr(encryptionBytes, encryptionSize);
 
-                            folderPath = CreatePath(output,decryptString);
+                                folderPath = CreatePath(output,(char*)encryptionString);
 
-                            printf("Created Folder: %s\n",folderPath );
-                            mkdir(folderPath,0755);
-                        }
+                                mkdir(folderPath,0755);
+                            } else {
+                                uint8_t *decryptBytes = NULL;
+                                char *decryptString = NULL;
 
-                        success = EncryptDirectory(path,key, encrypt, folderPath);
-                        
+                                decryptBytes = ToStrHex((uint8_t*)  entry->d_name);
+                                decryptString = (char*)DecryptString(decryptBytes, key, strlen(entry->d_name)/2);
+
+                                folderPath = CreatePath(output,decryptString);
+
+                                printf("Created Folder: %s\n",folderPath );
+                                mkdir(folderPath,0755);
+                            }
+
+                            success = EncryptDirectory(path,key, encrypt, folderPath);
+                        }                      
                     } else {
                         int fullPathLength=0;
 
@@ -451,4 +457,14 @@ char* CreatePath(char* basePath, char *filename)
     snprintf(path, pathLen, "%s/%s", basePath, filename);
 
     return path;
+}
+
+
+bool IsOnSkipList(char* filename)
+{
+    if (StrCmp(filename, ".git") || StrCmp(filename, ".GIT") )
+    {
+        return true;
+    }
+    return false;
 }
