@@ -2,6 +2,7 @@
 #include <time.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <stdexcept>
 #include "ErrorHandle.h"
 #include "Encryption.h"
 
@@ -18,11 +19,14 @@ enum typeChoice {
     DIRECTORY_TYPE
 };
 
+#define KEY_LEN 32
+
 bool IsOnSkipList(char* filename);
 bool EncryptDirectory(char *basePath, uint8_t *key, bool encrypt,char* output);
 void ShowOptions();
 void Logo();
 char* CreatePath(char* basePath, char *filename);
+void CheckKeyLength(char* key);
 
 int main(int argc,char *args[] )
 {
@@ -37,7 +41,7 @@ int main(int argc,char *args[] )
     char *outputFile = NULL;
     bool edstring = false;
     char *edstringStr = NULL;
-
+    char *outputfileTemp = NULL;
     /*j
     Get Options
     -e Encrypt file *required
@@ -51,73 +55,80 @@ int main(int argc,char *args[] )
             2. make the output the new dir + old filename
     */
 
-
-    Logo();
-
-    for (int i=1; i < argc;i++)
+    try
     {
-        char *option = NULL;
+       Logo();
 
-        option = args[i];
-        option = args[i];
+        for (int i=1; i < argc;i++)
+        {
+            char *option = NULL;
 
-        if (StrCmp(option, "-g"))
-        {
-            gen=true;
-        } else
-        if (StrCmp(option, "-e"))
-        {
-            encryptFile = true;
-        } else
-        if (StrCmp(option, "-d"))
-        {
-            encryptFile = false;
-        } else
-        if (i+1 < argc)
-        {
-            char *optionVal=NULL;
+            option = args[i];
+            option = args[i];
 
-            optionVal = args[i+1];
-
-            if (StrCmp(option, "-f"))
+            if (StrCmp(option, "-g"))
             {
-                struct stat info;
+                gen=true;
+            } else
+            if (StrCmp(option, "-e"))
+            {
+                encryptFile = true;
+            } else
+            if (StrCmp(option, "-d"))
+            {
+                encryptFile = false;
+            } else
+            if (i+1 < argc)
+            {
+                char *optionVal=NULL;
 
-                if (stat(optionVal, &info) == -1)
+                optionVal = args[i+1];
+
+                if (StrCmp(option, "-f"))
                 {
-                    WriteError("[-] Error File not found."); }
-                if (S_ISDIR(info.st_mode))
-                {
-                    choice = DIRECTORY_TYPE;
-                    filename = optionVal;
-                } else {
-                    choice = FILE_TYPE;
-                    filename = optionVal;
+                    struct stat info;
+
+                    if (stat(optionVal, &info) == -1) ThrowError("Error File not found.");
+
+                    if (S_ISDIR(info.st_mode))
+                    {
+                        choice = DIRECTORY_TYPE;
+                        filename = optionVal;
+                    } else {
+                        choice = FILE_TYPE;
+                        filename = optionVal;
+                    }
                 }
-            }
 
-            if (StrCmp(option, "-s"))
-            {
-                if (i+1 < argc)
+                if (StrCmp(option, "-s"))
                 {
-                    edstringStr = args[i+1];
-                    edstring = true;
+                    if (i+1 < argc)
+                    {
+                        edstringStr = args[i+1];
+                        edstring = true;
+                    }
                 }
-            }
-            if (StrCmp(option, "-k"))
-            {
-                /*
-                format A0B0C0E0F0010203040506070809A1A2
-                Check if the key length is 32
-                allocate space for new key unit8_t* = key uint8_t[32]
-                for loop by 2 to get hex and convert to uint_8
-                */
-
-                if (strlen(optionVal) == 32)
+                if (StrCmp(option, "-o"))
                 {
+                    if (i+1 < argc)
+                    {
+                        outputfileTemp = args[i+1];
+
+                    }
+                }
+                if (StrCmp(option, "-k"))
+                {
+                    /*
+                    format A0B0C0E0F0010203040506070809A1A2
+                    Check if the key length is 32
+                    allocate space for new key unit8_t* = key uint8_t[32]
+                    for loop by 2 to get hex and convert to uint_8
+                    */
+
+                    CheckKeyLength(optionVal);
+
                     int keyIndex = 0;
 
-                    //key = (uint8_t*) optionVal ;
                     key =  new uint8_t[32];
                     
                     for (int i = 0;i<32;i+=2)
@@ -140,40 +151,38 @@ int main(int argc,char *args[] )
                     }
                     
                     choosenKey=true;
-                } else {
-                    WriteError("[-] Key should be exactly 32 in length.\n");
                 }
-            }
-        } 
-    }
-
-    if (edstring == true)
-    {
-
-        uint8_t *encryptionBytes = NULL;
-
-        if (encryptFile )
-        {
-            char *outputString=NULL;
-            size_t encryptionSize = 0;
-
-            if (choosenKey == false)
-            {
-                unsigned int rngTime = 0;
-
-                rngTime = time(NULL) ^ clock();
-                key = advandedRNG(id, len, rngTime);
             } 
-            
-            encryptionBytes = EncryptString((char*)edstringStr, key, &encryptionSize);
-            outputString = (char*) ToHexStr(encryptionBytes, encryptionSize);
+        }
 
-            printf("%s\n", outputString);
+        if (edstring == true)
+        {
 
-            PrintHex(key, 16);
-        } else {
-            if (choosenKey)
+            uint8_t *encryptionBytes = NULL;
+
+            if (encryptFile )
             {
+                char *outputString=NULL;
+                size_t encryptionSize = 0;
+
+                if (choosenKey == false)
+                {
+                    unsigned int rngTime = 0;
+
+                    rngTime = time(NULL) ^ clock();
+                    key = advandedRNG(id, len, rngTime);
+                } 
+                
+                encryptionBytes = EncryptString((char*)edstringStr, key, &encryptionSize);
+                outputString = (char*) ToHexStr(encryptionBytes, encryptionSize);
+
+                printf("%s\n", outputString);
+
+                PrintHex(key, 16);
+            } else {
+
+                if (!choosenKey) ThrowError("Key must have a Length of 32.");
+
                 uint8_t *decryptBytes = NULL;
                 uint8_t *decryptString = NULL;
 
@@ -181,109 +190,122 @@ int main(int argc,char *args[] )
                 decryptString = DecryptString(decryptBytes, key, strlen(edstringStr)/2);
 
                 printf("%s\n",decryptString );
-            } else 
-            {
-                WriteError("[-] Key should be exactly 32 in length.\n");
             }
-        }
 
-    } else
-    if (gen==true)
-    {
-        unsigned int rngTime = 0;
-
-        rngTime = time(NULL) ^ clock();
-        key = advandedRNG(id, len, rngTime);
-        
-        PrintHex(key, 16);
-        
-    } else
-    if (choice != NONE && CheckForError() == false)
-    {
-        if (encryptFile)
+        } else
+        if (gen==true)
         {
-            if (key == NULL)
-            {
-                key = advandedRNG(id, len, time(NULL) ^ clock());
-            }
+            unsigned int rngTime = 0;
 
-            if (filename != NULL)
+            rngTime = time(NULL) ^ clock();
+            key = advandedRNG(id, len, rngTime);
+            
+            PrintHex(key, 16);
+            
+        } else
+        if (choice != NONE && CheckForError() == false)
+        {
+            if (encryptFile)
             {
-                if (choice == DIRECTORY_TYPE )
+                if (key == NULL)
                 {
-                    /*
-                        NOTE(): If there is no out put indicated then we shall create a new directory with the same
-                        name except tag _e at the end.
-                    */
-
-                    uint8_t *encryptionBytes = NULL;
-                    size_t encryptionSize = 0;
-                    uint8_t *unEncryptedFilename = NULL;
-
-                    unEncryptedFilename = GetFilenameFromPath(filename);
-
-                    encryptionBytes = EncryptString((char*)unEncryptedFilename, key, &encryptionSize);
-                    outputFile = (char*) ToHexStr(encryptionBytes, encryptionSize);
-
-                    mkdir(outputFile, 0755);
-                    printf("[+] Encrypting Directory: %s to %s \n",unEncryptedFilename ,outputFile);
-
-                    EncryptDirectory(filename,key, true, outputFile);
-                    printf("[+] Encrypted Directory.");
-                } else {
-                    printf("[+] Encrypting file: %s\n", filename);
-                    EncryptFile(filename, key, outputFile);
-                    printf("[+] Encrypted file.\n");
+                    key = advandedRNG(id, len, time(NULL) ^ clock());
                 }
 
-                printf("\nYour key is: \n");
-                PrintHex(key, 16);
-
-            } else {
-                ShowOptions();
-                printf("[-] File is required\n");
-            } 
-        } else 
-        if (encryptFile == false)
-        {
-            if (key)
-            {
                 if (filename != NULL)
                 {
                     if (choice == DIRECTORY_TYPE )
                     {
-                        uint8_t *decryptBytes = NULL;
-                        uint8_t *encyptedFilename = NULL;
+                        /*
+                            NOTE(): If there is no out put indicated then we shall create a new directory with the same
+                            name except tag _e at the end.
+                        */
 
-                        encyptedFilename= GetFilenameFromPath(filename);
+                        uint8_t *encryptionBytes = NULL;
+                        size_t encryptionSize = 0;
+                        uint8_t *unEncryptedFilename = NULL;
 
-                        decryptBytes = ToStrHex(encyptedFilename);
-                        outputFile = (char*)DecryptString(decryptBytes, key, strlen((char*)encyptedFilename) / 2 );
+                        unEncryptedFilename = GetFilenameFromPath(filename);
+
+                        encryptionBytes = EncryptString((char*)unEncryptedFilename, key, &encryptionSize);
+                        outputFile = (char*) ToHexStr(encryptionBytes, encryptionSize);
 
                         mkdir(outputFile, 0755);
-                        printf("[+] Decrypting Directory: %s to %s\n",encyptedFilename ,outputFile);
+                        printf("[+] Encrypting Directory: %s to %s \n",unEncryptedFilename ,outputFile);
 
-                        if (EncryptDirectory(filename,key, false,outputFile))
+                        EncryptDirectory(filename,key, true, outputFile);
+                        printf("[+] Encrypted Directory.");
+                    } else {
+                        if (outputfileTemp)
                         {
-                            printf("[+] Successfully decryped directory\n");
+
+                            printf("[+] Encrypting file: %s\n", filename);
+                            outputFile = (char*) Alloc(strlen(outputfileTemp));
+                            strcpy(outputFile,outputfileTemp);
+
+                            EncryptFile(filename, key, outputFile);
+                            printf("[+] Encrypted file to %s\n", outputFile);
+                        }
+                    }
+
+                    printf("\nYour key is: \n");
+                    PrintHex(key, 16);
+
+                } else {
+                    ShowOptions();
+                    printf("[-] File is required\n");
+                } 
+            } else 
+            if (encryptFile == false)
+            {
+                if (key)
+                {
+                    if (filename != NULL)
+                    {
+                        if (choice == DIRECTORY_TYPE )
+                        {
+                            uint8_t *decryptBytes = NULL;
+                            uint8_t *encyptedFilename = NULL;
+
+                            encyptedFilename= GetFilenameFromPath(filename);
+
+                            decryptBytes = ToStrHex(encyptedFilename);
+                            outputFile = (char*)DecryptString(decryptBytes, key, strlen((char*)encyptedFilename) / 2 );
+
+                            mkdir(outputFile, 0755);
+                            printf("[+] Decrypting Directory: %s to %s\n",encyptedFilename ,outputFile);
+
+                            if (EncryptDirectory(filename,key, false,outputFile))
+                            {
+                                printf("[+] Successfully decryped directory\n");
+                            }
+                        } else {
+                            printf("[+] Decrypting file: %s\n", filename);
+                            if (filename)
+                            {
+                                outputFile = (char*) Alloc(strlen(outputfileTemp));
+                                strcpy(outputFile,outputfileTemp);
+                                DecryptFile(filename, key, outputFile);
+                                printf("[+] Decrypted file\n");
+                            }
                         }
                     } else {
-                        printf("[+] Decrypting files\n");
-                        DecryptFile(filename, key, outputFile);
-                        printf("[+] Decrypted files\n");
+                        ShowOptions();
+                        WriteError("[-] File is required\n");
                     }
                 } else {
                     ShowOptions();
-                    WriteError("[-] File is required\n");
+                    WriteError("[-] Key is required to Decrypt data.\n");
                 }
-            } else {
-                ShowOptions();
-                 WriteError("[-] Key is required to Decrypt data.\n");
             }
+        } else {
+            ShowOptions();
+            WriteError("[-] No File specified.\n");
         }
-    } else {
-        ShowOptions();
-        WriteError("[-] No File specified.\n");
+
+    } catch(const std::runtime_error& e)
+    {
+        printf("[-] %s\n", e.what());
     }
 
     if (CheckForError())
@@ -334,10 +356,9 @@ bool EncryptDirectory(char *basePath, uint8_t *key, bool encrypt,char* output)
                         
                         if (IsOnSkipList(entry->d_name))
                         {
-                            printf("[!] Skipping %s\n", entry->d_name);
-                        } else {
-                            if (encrypt)
-                            {
+                            printf("[!] Skipping %s\n", entry->d_name); 
+                        } else { 
+                            if (encrypt) {
                                 uint8_t *encryptionBytes = NULL;
                                 uint8_t *encryptionString= NULL;
                                 size_t encryptionSize = 0;
@@ -467,4 +488,10 @@ bool IsOnSkipList(char* filename)
         return true;
     }
     return false;
+}
+
+
+void CheckKeyLength(char* key)
+{
+    if (strlen(key) != KEY_LEN) ThrowError("Length must have the length of 32.");
 }

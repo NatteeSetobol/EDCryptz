@@ -50,3 +50,8 @@ bool CheckForError()
     }
     return false;
 }
+
+void ThrowError(char* ErrorMessage)
+{
+    throw std::runtime_error(ErrorMessage);
+}
